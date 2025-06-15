@@ -5,15 +5,24 @@ const mindarThree = new window.MINDAR.IMAGE.MindARThree({
 
 const { renderer, scene, camera } = mindarThree;
 
+const loader = new THREE.GLTFLoader();
+
 async function start() {
   const anchor = mindarThree.addAnchor(0);
 
-  // Küp
-  const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-  const material = new THREE.MeshBasicMaterial({ color: 0x0077ff });
-  const cube = new THREE.Mesh(geometry, material);
-  cube.position.y = 0.25;
-  anchor.group.add(cube);
+  loader.load(
+    './assets/model.glb', // ← Model yolun
+    function (gltf) {
+      const model = gltf.scene;
+      model.scale.set(0.3, 0.3, 0.3); // boyutu ayarla
+      model.position.y = 0.1;
+      anchor.group.add(model);
+    },
+    undefined,
+    function (error) {
+      console.error("Model yüklenemedi:", error);
+    }
+  );
 
   await mindarThree.start();
   renderer.setAnimationLoop(() => {
