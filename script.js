@@ -1,7 +1,5 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
-import { MindARThree } from 'https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-three.prod.js';
-
-const mindarThree = new MindARThree({
+// Three.js ve MindAR global olarak yüklendi
+const mindarThree = new window.MindARThree({
   container: document.querySelector("#ar-container"),
   imageTargetSrc: "./assets/gokmedrese-marker.mind"
 });
