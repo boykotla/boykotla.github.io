@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Gök Medrese AR Demo</title>
-  <style>body,html { margin:0; padding:0; overflow:hidden; }</style>
+  <meta charset="UTF-8">
+  <title>Gök Medrese AR</title>
+  <style>
+    body, html { margin: 0; padding: 0; overflow: hidden; }
+    #ar-container { width: 100vw; height: 100vh; }
+  </style>
 </head>
 <body>
   <div id="ar-container"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <!-- ✅ DOĞRU VERSİYONLAR -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-three.prod.js"></script>
 
+  <!-- Kendi script dosyamız -->
   <script src="script.js"></script>
 </body>
 </html>
