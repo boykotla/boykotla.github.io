@@ -1,27 +1,21 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8" />
   <title>Gök Medrese AR Demo</title>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-three.prod.js"></script>
-  <script type="module" src="./script.js"></script>
   <style>
-    body { margin: 0; overflow: hidden; }
-    #infoBox {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 10px;
-      display: none;
-    }
+    body, html { margin:0; padding:0; overflow:hidden; }
+    #ar-container { width: 100vw; height: 100vh; }
   </style>
 </head>
 <body>
-  <div id="infoBox">Bu bir demo açıklamadır.</div>
-  <script type="module" src="./script.js"></script>
+  <div id="ar-container"></div>
+
+  <!-- Three.js global -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <!-- MindAR global -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-three.prod.js"></script>
+  <!-- Kendi script -->
+  <script src="script.js" type="module"></script>
 </body>
 </html>
