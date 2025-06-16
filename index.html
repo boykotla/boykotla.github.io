@@ -64,15 +64,28 @@
 
     <script>
         // Basit bir gesture (jest) dedektörü bileşeni
+        // Bu bileşen, daha sonra modele dokunma/sürükleme etkileşimleri eklemek için bir başlangıç noktasıdır.
         AFRAME.registerComponent('gesture-detector', {
             schema: {
-                target: { type: 'selector' }
+                target: { type: 'selector' } // Hedef elementi seçmek için şema
             },
             init: function () {
+                // handleGesture metodunun 'this' bağlamını bileşene bağlama
                 this.handleGesture = this.handleGesture.bind(this);
-                this.el.sceneEl.addEventListener('touchstart', this.handleGesture);
-                this.el.sceneEl.addEventListener('touchend', this.handleGesture);
-                this.el.sceneEl.addEventListener('touchmove', this.handleGesture);
+                // Olay dinleyicilerini doğrudan a-scene elementine ekleme (this.el zaten a-scene)
+                this.el.addEventListener('touchstart', this.handleGesture);
+                this.el.addEventListener('touchend', this.handleGesture);
+                this.el.addEventListener('touchmove', this.handleGesture);
+            },
+            handleGesture: function (event) {
+                // Burada gesture algılama ve model manipülasyonu için mantık geliştirilebilir.
+                // Bu örnek için temel bir iskelet bırakılmıştır.
+                // Örneğin:
+                // if (event.touches.length === 2) {
+                //     // İki parmakla sıkıştırma (pinch) ile ölçeklendirme
+                // } else if (event.touches.length === 1) {
+                //     // Tek parmakla sürükleme ile pozisyon değiştirme
+                // }
             }
         });
 
@@ -87,27 +100,35 @@
                     console.log("AR.js Ready!");
                     infoText.style.display = 'block'; // Bilgilendirme metnini göster
 
-                    // 'arjs-hit-testing' bileşeni, dokunmatik girişe göre yüzeyleri bulmaya yardımcı olur.
-                    // 'plane-detection' ile yüzeyleri otomatik algılar ve modelin yerleşeceği 'anchor'u oluştururuz.
+                    // 'arjs-hit-testing' bileşeni, kamera görüntüsünden düz yüzeyleri algılar.
+                    // 'plane-detection' ile otomatik düzlem algılama yapılır.
                     const planeAnchor = document.createElement('a-entity');
-                    planeAnchor.setAttribute('arjs-hit-testing', 'enabled: true;'); // Dokunma ile yerleştirme için
-                    planeAnchor.setAttribute('plane-detection', ''); // Otomatik düzlem algılama
-                    planeAnchor.setAttribute('gltf-model', 'url(./assets/model.glb)'); // Kendi modelinizin yolu BURASI GÜNCELLENDİ
-                    planeAnchor.setAttribute('scale', '0.5 0.5 0.5'); // Modelin boyutu
-                    planeAnchor.setAttribute('position', '0 0 -2'); // Başlangıç pozisyonu (kameralık)
+                    planeAnchor.setAttribute('arjs-hit-testing', 'enabled: true;');
+                    planeAnchor.setAttribute('plane-detection', '');
+                    
+                    // Kendi 3D modelinizin yolu (model.glb olarak güncellendi)
+                    planeAnchor.setAttribute('gltf-model', 'url(./assets/model.glb)'); 
+                    
+                    // Modelin boyutu (ölçeklendirme)
+                    planeAnchor.setAttribute('scale', '0.5 0.5 0.5'); 
+                    
+                    // Modelin başlangıç pozisyonu (kamera önünde biraz geride)
+                    planeAnchor.setAttribute('position', '0 0 -2'); 
 
                     // Eğer modelinizde animasyon varsa, 'animation-mixer' bileşenini ekleyin
-                    planeAnchor.setAttribute('animation-mixer', 'loop: repeat'); // Animasyonları tekrarla
+                    // 'loop: repeat' animasyonun sürekli tekrar etmesini sağlar
+                    planeAnchor.setAttribute('animation-mixer', 'loop: repeat'); 
 
                     // Modeli sahneye ekle
                     el.appendChild(planeAnchor);
 
-                    // Model yerleştirildiğinde bilgilendirme metnini gizle (isteğe bağlı)
+                    // Model yüklendiğinde bilgilendirme metnini gizle (isteğe bağlı)
                     planeAnchor.addEventListener('model-loaded', function() {
                         infoText.style.display = 'none';
                     });
                 });
 
+                // AR başlatılırken bir hata oluşursa yakalamak için
                 el.addEventListener('arError', function (error) {
                     console.error("AR.js Error:", error);
                     alert("AR başlatılırken bir hata oluştu. Lütfen kameranıza izin verdiğinizden emin olun ve tarayıcınızı güncelleyin.");
@@ -115,16 +136,19 @@
             }
         });
 
+        // HTML elementlerini seçme
         const arButton = document.getElementById('ar-button');
         const arScene = document.getElementById('ar-scene');
         const infoText = document.getElementById('info-text');
 
+        // Butona tıklama olayını dinleme
         arButton.addEventListener('click', function() {
             arButton.style.display = 'none'; // Butonu gizle
             arScene.style.display = 'block'; // AR sahnesini göster
             infoText.style.display = 'block'; // Bilgilendirme metnini göster
 
-            // AR.js'in başlatılması için sahneye özel bir bileşen ekle
+            // AR.js'in başlatılması için sahneye 'student-model' bileşenini ekle
+            // Bu, 'student-model' bileşeninin 'init' metodunu tetikler.
             arScene.setAttribute('student-model', '');
         });
     </script>
