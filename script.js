@@ -6,7 +6,6 @@ const mindarThree = new window.MINDAR.IMAGE.MindARThree({
   filterMinCF: 0.001,
   filterBeta: 0.001,
   uiScanning: true,
-  uiLoading: "yes",
   videoConfig: {
     facingMode: "environment",
     width: { ideal: 640 },
