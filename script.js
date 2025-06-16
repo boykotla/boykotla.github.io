@@ -50,7 +50,7 @@ async function start() {
 
       // Modelin boyutunu ayarla: Daha büyük görünmesini istiyorsanız değerleri artırın.
       // Örneğin, 0.3 yerine 0.5 yaparak %66 daha büyük görünmesini sağlayabilirsiniz.
-      model.scale.set(2, 2, 2); // Her eksende aynı oranda büyütmek için genellikle hepsi aynı değerde tutulur.
+      model.scale.set(1, 1, 1); // Her eksende aynı oranda büyütmek için genellikle hepsi aynı değerde tutulur.
 
       // Modelin konumunu ayarla: Algılanan hedefe göre pozisyonu değiştirir.
       // Varsayılan olarak y=0.1 idi (hedefin biraz üstünde).
@@ -58,7 +58,7 @@ async function start() {
       // Y: modelin yukarı/aşağı hareketi (hedefin üzerindeki yüksekliği)
       // X: modelin sağa/sola hareketi
       // Z: modelin ileri/geri hareketi
-      model.position.set(0.0, -1, 0.5); // Örnek: Y ekseninde (yukarı doğru) biraz daha yüksekte olsun.
+      model.position.set(0.0, -5, 0.5); // Örnek: Y ekseninde (yukarı doğru) biraz daha yüksekte olsun.
                                         // Eğer sağa kaydırmak isterseniz (0.1, 0.2, 0.0) gibi.
                                         // Eğer hedefin önünde veya arkasında olmasını isterseniz Z değerini ayarlayın.
                                         // Bu değerler, hedefin boyutuna ve istediğiniz mesafeye göre değişecektir.
