@@ -3,8 +3,8 @@ const mindarThree = new window.MINDAR.IMAGE.MindARThree({
   imageTargetSrc: "./assets/gokmedrese.mind",
   maxTrack: 1,
   warmupTolerance: 0.2,
-  filterMinCF: 0.001,
-  filterBeta: 0.001,
+  filterMinCF: 0.005, // Biraz daha hızlı tepki için
+  filterBeta: 0.005, 
   uiScanning: true,
   // Çözünürlük artırmak için burayı ekle:
   videoConfig: {
