@@ -9,8 +9,8 @@ const mindarThree = new window.MINDAR.IMAGE.MindARThree({
   uiLoading: "yes",
   videoConfig: {
     facingMode: "environment",
-    width: { ideal: 1280 },
-    height: { ideal: 720 }
+    width: { ideal: 1080 },
+    height: { ideal: 1920 }
   }
 });
 
