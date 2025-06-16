@@ -1,26 +1,132 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Gök Medrese AR</title>
-  <style>
-    body, html { margin: 0; padding: 0; overflow: hidden; }
-    #ar-container { width: 100vw; height: 100vh; }
-  </style>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Gök Medrese AR Deneyimi</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.2.0/dist/aframe-extras.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #ar-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            background-color: #4CAF50; /* Yeşil */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        #ar-button:hover {
+            background-color: #45a049;
+        }
+        #info-text {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1em;
+            text-align: center;
+            z-index: 9998;
+            display: none; /* Başlangıçta gizli */
+        }
+    </style>
 </head>
 <body>
-  <div id="ar-container"></div>
+    <a-scene
+        vr-mode-ui="enabled: false"
+        arjs="sourceType: webcam; detectionMode: mono; maxDetectionRate: 60; trackingMethod: best;"
+        renderer="logarithmicDepthBuffer: true; antialias: true;"
+        embedded
+        gesture-detector
+        id="ar-scene"
+        style="display: none;" >
+        <a-entity light="type: ambient; color: #BBB"></a-entity>
+        <a-entity light="type: directional; color: #FFF; intensity: 0.6" position="-1 1 1"></a-entity>
 
-  <!-- Three.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js"></script>
+        <a-camera position="0 0 0" look-controls="enabled: false" rotation-controls="enabled: false"></a-camera>
+    </a-scene>
 
-  <!-- GLTF Loader -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/loaders/GLTFLoader.js"></script>
+    <button id="ar-button">AR Deneyimini Başlat</button>
+    <div id="info-text">Düz bir yüzeye (zemin, masa) odaklayın. 3D model otomatik olarak belirecektir.</div>
 
-  <!-- MindAR -->
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-three.prod.js"></script>
+    <script>
+        // Basit bir gesture (jest) dedektörü bileşeni
+        AFRAME.registerComponent('gesture-detector', {
+            schema: {
+                target: { type: 'selector' }
+            },
+            init: function () {
+                this.handleGesture = this.handleGesture.bind(this);
+                this.el.sceneEl.addEventListener('touchstart', this.handleGesture);
+                this.el.sceneEl.addEventListener('touchend', this.handleGesture);
+                this.el.sceneEl.addEventListener('touchmove', this.handleGesture);
+            }
+        });
 
-  <!-- Script -->
-  <script src="script.js"></script>
+        // 3D öğrenci modelini ekleyen ve AR yüzeyine yerleştiren A-Frame bileşeni
+        AFRAME.registerComponent('student-model', {
+            init: function () {
+                const el = this.el; // <a-scene> elementi
+                const infoText = document.getElementById('info-text');
+
+                // AR.js tamamen yüklendiğinde ve hazır olduğunda tetiklenir.
+                el.addEventListener('arReady', function() {
+                    console.log("AR.js Ready!");
+                    infoText.style.display = 'block'; // Bilgilendirme metnini göster
+
+                    // 'arjs-hit-testing' bileşeni, dokunmatik girişe göre yüzeyleri bulmaya yardımcı olur.
+                    // 'plane-detection' ile yüzeyleri otomatik algılar ve modelin yerleşeceği 'anchor'u oluştururuz.
+                    const planeAnchor = document.createElement('a-entity');
+                    planeAnchor.setAttribute('arjs-hit-testing', 'enabled: true;'); // Dokunma ile yerleştirme için
+                    planeAnchor.setAttribute('plane-detection', ''); // Otomatik düzlem algılama
+                    planeAnchor.setAttribute('gltf-model', 'url(./assets/model.glb)'); // Kendi modelinizin yolu BURASI GÜNCELLENDİ
+                    planeAnchor.setAttribute('scale', '0.5 0.5 0.5'); // Modelin boyutu
+                    planeAnchor.setAttribute('position', '0 0 -2'); // Başlangıç pozisyonu (kameralık)
+
+                    // Eğer modelinizde animasyon varsa, 'animation-mixer' bileşenini ekleyin
+                    planeAnchor.setAttribute('animation-mixer', 'loop: repeat'); // Animasyonları tekrarla
+
+                    // Modeli sahneye ekle
+                    el.appendChild(planeAnchor);
+
+                    // Model yerleştirildiğinde bilgilendirme metnini gizle (isteğe bağlı)
+                    planeAnchor.addEventListener('model-loaded', function() {
+                        infoText.style.display = 'none';
+                    });
+                });
+
+                el.addEventListener('arError', function (error) {
+                    console.error("AR.js Error:", error);
+                    alert("AR başlatılırken bir hata oluştu. Lütfen kameranıza izin verdiğinizden emin olun ve tarayıcınızı güncelleyin.");
+                });
+            }
+        });
+
+        const arButton = document.getElementById('ar-button');
+        const arScene = document.getElementById('ar-scene');
+        const infoText = document.getElementById('info-text');
+
+        arButton.addEventListener('click', function() {
+            arButton.style.display = 'none'; // Butonu gizle
+            arScene.style.display = 'block'; // AR sahnesini göster
+            infoText.style.display = 'block'; // Bilgilendirme metnini göster
+
+            // AR.js'in başlatılması için sahneye özel bir bileşen ekle
+            arScene.setAttribute('student-model', '');
+        });
+    </script>
 </body>
 </html>
