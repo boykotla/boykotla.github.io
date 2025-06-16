@@ -44,14 +44,28 @@ async function start() {
   const anchor = mindarThree.addAnchor(0);
 
   loader.load(
-    './assets/model.glb', // ← Model yolun
+    './assets/model.glb', // ← Model yolunuz
     function (gltf) {
       const model = gltf.scene;
-      model.scale.set(0.3, 0.3, 0.3); // boyutu ayarla
-      model.position.y = 0.1;
+
+      // Modelin boyutunu ayarla: Daha büyük görünmesini istiyorsanız değerleri artırın.
+      // Örneğin, 0.3 yerine 0.5 yaparak %66 daha büyük görünmesini sağlayabilirsiniz.
+      model.scale.set(0.5, 0.5, 0.5); // Her eksende aynı oranda büyütmek için genellikle hepsi aynı değerde tutulur.
+
+      // Modelin konumunu ayarla: Algılanan hedefe göre pozisyonu değiştirir.
+      // Varsayılan olarak y=0.1 idi (hedefin biraz üstünde).
+      // Eğer hedeften dışarıda (örneğin sağında veya solunda) olmasını isterseniz x veya z değerlerini ayarlayın.
+      // Y: modelin yukarı/aşağı hareketi (hedefin üzerindeki yüksekliği)
+      // X: modelin sağa/sola hareketi
+      // Z: modelin ileri/geri hareketi
+      model.position.set(0.0, 0.2, 0.0); // Örnek: Y ekseninde (yukarı doğru) biraz daha yüksekte olsun.
+                                        // Eğer sağa kaydırmak isterseniz (0.1, 0.2, 0.0) gibi.
+                                        // Eğer hedefin önünde veya arkasında olmasını isterseniz Z değerini ayarlayın.
+                                        // Bu değerler, hedefin boyutuna ve istediğiniz mesafeye göre değişecektir.
+
       anchor.group.add(model);
     },
-    undefined, // Yükleme sırasında ilerlemeyi bildiren isteğe bağlı bir fonksiyon
+    undefined,
     function (error) {
       console.error("Model yüklenemedi:", error);
     }
