@@ -58,7 +58,7 @@ async function start() {
       // Y: modelin yukarı/aşağı hareketi (hedefin üzerindeki yüksekliği)
       // X: modelin sağa/sola hareketi
       // Z: modelin ileri/geri hareketi
-      model.position.set(0.0, -2, 0); // Örnek: Y ekseninde (yukarı doğru) biraz daha yüksekte olsun.
+      model.position.set(0, 0, 0); // Örnek: Y ekseninde (yukarı doğru) biraz daha yüksekte olsun.
                                         // Eğer sağa kaydırmak isterseniz (0.1, 0.2, 0.0) gibi.
                                         // Eğer hedefin önünde veya arkasında olmasını isterseniz Z değerini ayarlayın.
                                         // Bu değerler, hedefin boyutuna ve istediğiniz mesafeye göre değişecektir.
