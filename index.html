@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Gök Medrese AR Deneyimi</title>
+    <title>Gök Medrese AR Deneyimi - Reticle</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.2.0/dist/aframe-extras.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
@@ -41,6 +41,8 @@
             text-align: center;
             z-index: 9998;
             display: none; /* Başlangıçta gizli */
+            width: 80%; /* Mobil uyumluluk için */
+            box-sizing: border-box; /* Padding'in genişliği etkilememesi için */
         }
     </style>
 </head>
@@ -50,85 +52,95 @@
         arjs="sourceType: webcam; detectionMode: mono; maxDetectionRate: 60; trackingMethod: best;"
         renderer="logarithmicDepthBuffer: true; antialias: true;"
         embedded
-        gesture-detector
         id="ar-scene"
-        style="display: none;" >
+        style="display: none;"
+    >
         <a-entity light="type: ambient; color: #BBB"></a-entity>
         <a-entity light="type: directional; color: #FFF; intensity: 0.6" position="-1 1 1"></a-entity>
 
-        <a-camera position="0 0 0" look-controls="enabled: false" rotation-controls="enabled: false"></a-camera>
+        <a-entity
+            id="reticle"
+            geometry="primitive: ring; radiusInner: 0.015; radiusOuter: 0.025; segmentsTheta: 32;"
+            material="color: #00FF00; shader: flat; transparent: true; opacity: 0.8;"
+            position="0 0 -0.5"
+            rotation="-90 0 0"
+            visible="false" ></a-entity>
+        
+        <a-camera position="0 0 0" rotation-controls="enabled: false"></a-camera>
     </a-scene>
 
     <button id="ar-button">AR Deneyimini Başlat</button>
-    <div id="info-text">Düz bir yüzeye (zemin, masa) odaklayın. 3D model otomatik olarak belirecektir.</div>
+    <div id="info-text">Cihazınızı iyi aydınlatılmış, düz bir yüzeye (zemin, masa) doğru tutun ve yavaşça hareket ettirin. Nişangahı gördüğünüzde ekrana dokunarak modeli yerleştirin.</div>
 
     <script>
-        // Basit bir gesture (jest) dedektörü bileşeni
-        // Bu bileşen, daha sonra modele dokunma/sürükleme etkileşimleri eklemek için bir başlangıç noktasıdır.
-        AFRAME.registerComponent('gesture-detector', {
-            schema: {
-                target: { type: 'selector' } // Hedef elementi seçmek için şema
-            },
-            init: function () {
-                // handleGesture metodunun 'this' bağlamını bileşene bağlama
-                this.handleGesture = this.handleGesture.bind(this);
-                // Olay dinleyicilerini doğrudan a-scene elementine ekleme (this.el zaten a-scene)
-                this.el.addEventListener('touchstart', this.handleGesture);
-                this.el.addEventListener('touchend', this.handleGesture);
-                this.el.addEventListener('touchmove', this.handleGesture);
-            },
-            handleGesture: function (event) {
-                // Burada gesture algılama ve model manipülasyonu için mantık geliştirilebilir.
-                // Bu örnek için temel bir iskelet bırakılmıştır.
-                // Örneğin:
-                // if (event.touches.length === 2) {
-                //     // İki parmakla sıkıştırma (pinch) ile ölçeklendirme
-                // } else if (event.touches.length === 1) {
-                //     // Tek parmakla sürükleme ile pozisyon değiştirme
-                // }
-            }
-        });
-
-        // 3D öğrenci modelini ekleyen ve AR yüzeyine yerleştiren A-Frame bileşeni
+        // student-model bileşeni
         AFRAME.registerComponent('student-model', {
             init: function () {
                 const el = this.el; // <a-scene> elementi
                 const infoText = document.getElementById('info-text');
+                const reticle = document.getElementById('reticle');
+                let modelPlaced = false; 
 
-                // AR.js tamamen yüklendiğinde ve hazır olduğunda tetiklenir.
                 el.addEventListener('arReady', function() {
                     console.log("AR.js Ready!");
-                    infoText.style.display = 'block'; // Bilgilendirme metnini göster
+                    infoText.style.display = 'block';
 
-                    // 'arjs-hit-testing' bileşeni, kamera görüntüsünden düz yüzeyleri algılar.
-                    // 'plane-detection' ile otomatik düzlem algılama yapılır.
-                    const planeAnchor = document.createElement('a-entity');
-                    planeAnchor.setAttribute('arjs-hit-testing', 'enabled: true;');
-                    planeAnchor.setAttribute('plane-detection', '');
-                    
-                    // Kendi 3D modelinizin yolu (model.glb olarak güncellendi)
-                    planeAnchor.setAttribute('gltf-model', 'url(./assets/model.glb)'); 
-                    
-                    // Modelin boyutu (ölçeklendirme)
-                    planeAnchor.setAttribute('scale', '0.5 0.5 0.5'); 
-                    
-                    // Modelin başlangıç pozisyonu (kamera önünde biraz geride)
-                    planeAnchor.setAttribute('position', '0 0 -2'); 
+                    // Kameranın ortasına bir raycaster (ışın atıcı) ekleyelim.
+                    // Bu, kameranın baktığı noktadaki yüzeyleri tespit etmeye yarar.
+                    el.camera.el.setAttribute('raycaster', 'objects: [plane-detection], [gltf-model]; far: 100;');
+                    el.camera.el.setAttribute('cursor', 'fuse: false; rayOrigin: mouse'); // Dokunma için fare imlecini kullan
 
-                    // Eğer modelinizde animasyon varsa, 'animation-mixer' bileşenini ekleyin
-                    // 'loop: repeat' animasyonun sürekli tekrar etmesini sağlar
-                    planeAnchor.setAttribute('animation-mixer', 'loop: repeat'); 
+                    // Raycaster'ın kesişim noktasını dinleyelim (yani nişangahın nereye çarpacağını)
+                    el.camera.el.addEventListener('raycaster-intersection', function(evt) {
+                        if (evt.detail.els.length > 0) { // Kesişim varsa
+                            const intersection = evt.detail.intersections[0];
+                            if (intersection.object.el.hasAttribute('plane-detection') || intersection.object.el.id === 'reticle') { // Algılanan düzlem veya reticle üzerine gelirse
+                                reticle.setAttribute('position', `${intersection.point.x} ${intersection.point.y} ${intersection.point.z}`);
+                                reticle.setAttribute('visible', 'true'); // Nişangahı görünür yap
+                                infoText.innerText = "Nişangahı gördünüz! Modeli yerleştirmek için ekrana dokunun.";
+                            }
+                        } else {
+                            reticle.setAttribute('visible', 'false'); // Kesişim yoksa gizle
+                            infoText.innerText = "Cihazınızı iyi aydınlatılmış, düz bir yüzeye doğru tutun ve yavaşça hareket ettirin.";
+                        }
+                    });
 
-                    // Modeli sahneye ekle
-                    el.appendChild(planeAnchor);
+                    el.camera.el.addEventListener('raycaster-no-intersection', function() {
+                         reticle.setAttribute('visible', 'false'); // Kesişim yoksa gizle
+                         if (!modelPlaced) { // Model yerleştirilmediyse bilgi metnini göster
+                             infoText.innerText = "Cihazınızı iyi aydınlatılmış, düz bir yüzeye doğru tutun ve yavaşça hareket ettirin.";
+                         }
+                    });
 
-                    // Model yüklendiğinde bilgilendirme metnini gizle (isteğe bağlı)
-                    planeAnchor.addEventListener('model-loaded', function() {
-                        infoText.style.display = 'none';
+                    // Kullanıcı dokunduğunda modeli yerleştirmek için
+                    el.addEventListener('click', function(evt) {
+                        // evt.detail.intersection objesi, raycaster'ın vurduğu ilk noktayı içerir.
+                        if (evt.detail.intersection && !modelPlaced) {
+                            const hitPoint = evt.detail.intersection.point; // Dokunulan noktanın 3D koordinatları
+
+                            const modelEntity = document.createElement('a-entity');
+                            modelEntity.setAttribute('gltf-model', 'url(./assets/model.glb)');
+                            modelEntity.setAttribute('scale', '0.5 0.5 0.5');
+                            modelEntity.setAttribute('position', `${hitPoint.x} ${hitPoint.y} ${hitPoint.z}`);
+                            modelEntity.setAttribute('animation-mixer', 'loop: repeat');
+                            
+                            // Modeli zemine oturtmak için y ekseninde modelin boyutu kadar yukarı kaydırma gerekebilir
+                            // Eğer modelin pivot noktası merkezde ise:
+                            // modelEntity.setAttribute('position', `${hitPoint.x} ${hitPoint.y + (modelGercekYukseklik * 0.5) / 2} ${hitPoint.z}`);
+
+                            el.appendChild(modelEntity); // Modeli sahneye ekle
+                            modelPlaced = true;
+                            infoText.innerText = "Medrese öğrencisi yerleştirildi!";
+                            reticle.setAttribute('visible', 'false'); // Model yerleşince nişangahı gizle
+                            setTimeout(() => infoText.style.display = 'none', 3000); // 3 saniye sonra bilgilendirme metnini gizle
+                            
+                            // Eğer birden fazla model yerleştirmeye izin vermek istiyorsanız:
+                            // modelPlaced = false; // Bir sonraki tıklama için hazırla
+                            // reticle.setAttribute('visible', 'true'); // Nişangahı tekrar göster
+                        }
                     });
                 });
 
-                // AR başlatılırken bir hata oluşursa yakalamak için
                 el.addEventListener('arError', function (error) {
                     console.error("AR.js Error:", error);
                     alert("AR başlatılırken bir hata oluştu. Lütfen kameranıza izin verdiğinizden emin olun ve tarayıcınızı güncelleyin.");
@@ -136,20 +148,16 @@
             }
         });
 
-        // HTML elementlerini seçme
         const arButton = document.getElementById('ar-button');
         const arScene = document.getElementById('ar-scene');
         const infoText = document.getElementById('info-text');
 
-        // Butona tıklama olayını dinleme
         arButton.addEventListener('click', function() {
             arButton.style.display = 'none'; // Butonu gizle
             arScene.style.display = 'block'; // AR sahnesini göster
             infoText.style.display = 'block'; // Bilgilendirme metnini göster
 
-            // AR.js'in başlatılması için sahneye 'student-model' bileşenini ekle
-            // Bu, 'student-model' bileşeninin 'init' metodunu tetikler.
-            arScene.setAttribute('student-model', '');
+            arScene.setAttribute('student-model', ''); // student-model bileşenini tetikle
         });
     </script>
 </body>
