@@ -7,16 +7,18 @@ const mindarThree = new window.MINDAR.IMAGE.MindARThree({
   filterBeta: 0.001,
   uiScanning: true,
   uiLoading: "yes",
-  
   videoConfig: {
-    facingMode: "environment", 
-    width: { ideal: 1280 },
-    height: { ideal: 720 }
+    facingMode: "environment",
+    width: { ideal: 640 },
+    height: { ideal: 480 }
   }
 });
 
-
 const { renderer, scene, camera } = mindarThree;
+
+// 📌 Kalite artırımı için burası önemli
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
 
 const loader = new THREE.GLTFLoader();
 
@@ -24,10 +26,10 @@ async function start() {
   const anchor = mindarThree.addAnchor(0);
 
   loader.load(
-    './assets/model.glb', // ← Model yolun
+    './assets/model.glb',
     function (gltf) {
       const model = gltf.scene;
-      model.scale.set(0.3, 0.3, 0.3); // boyutu ayarla
+      model.scale.set(0.3, 0.3, 0.3);
       model.position.y = 0.1;
       anchor.group.add(model);
     },
