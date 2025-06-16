@@ -1,4 +1,8 @@
-const mindarThree = new window.MINDAR.IMAGE.MindARThree({
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.module.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
+import { MindARThree } from 'https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-three.prod.js';
+
+const mindarThree = new MindARThree({
   container: document.querySelector("#ar-container"),
   imageTargetSrc: "./assets/gokmedrese.mind",
   maxTrack: 1,
@@ -15,21 +19,15 @@ const mindarThree = new window.MINDAR.IMAGE.MindARThree({
 
 const { renderer, scene, camera } = mindarThree;
 
-// Kalite artırma
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.physicallyCorrectLights = true;
+// Işıkları ekle
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambientLight);
 
-// Işık ekle
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-scene.add(hemiLight);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+directionalLight.position.set(1, 2, 3);
+scene.add(directionalLight);
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-dirLight.position.set(0, 10, 10);
-scene.add(dirLight);
-
-const loader = new THREE.GLTFLoader();
+const loader = new GLTFLoader();
 
 async function start() {
   const anchor = mindarThree.addAnchor(0);
@@ -38,17 +36,6 @@ async function start() {
     './assets/model.glb',
     (gltf) => {
       const model = gltf.scene;
-
-      model.traverse((child) => {
-        if (child.isMesh) {
-          child.material.side = THREE.DoubleSide;
-          child.material.encoding = THREE.sRGBEncoding;
-          child.castShadow = true;
-          child.receiveShadow = true;
-          child.material.needsUpdate = true;
-        }
-      });
-
       model.scale.set(0.3, 0.3, 0.3);
       model.position.y = 0.1;
       anchor.group.add(model);
@@ -60,7 +47,8 @@ async function start() {
   );
 
   await mindarThree.start();
-
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setAnimationLoop(() => {
     renderer.render(scene, camera);
   });
