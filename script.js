@@ -15,9 +15,19 @@ const mindarThree = new window.MINDAR.IMAGE.MindARThree({
 
 const { renderer, scene, camera } = mindarThree;
 
-// 📌 Kalite artırımı için burası önemli
+// Kalite artırma
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.physicallyCorrectLights = true;
+
+// Işık ekle
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+scene.add(hemiLight);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(0, 10, 10);
+scene.add(dirLight);
 
 const loader = new THREE.GLTFLoader();
 
@@ -26,19 +36,31 @@ async function start() {
 
   loader.load(
     './assets/model.glb',
-    function (gltf) {
+    (gltf) => {
       const model = gltf.scene;
+
+      model.traverse((child) => {
+        if (child.isMesh) {
+          child.material.side = THREE.DoubleSide;
+          child.material.encoding = THREE.sRGBEncoding;
+          child.castShadow = true;
+          child.receiveShadow = true;
+          child.material.needsUpdate = true;
+        }
+      });
+
       model.scale.set(0.3, 0.3, 0.3);
       model.position.y = 0.1;
       anchor.group.add(model);
     },
     undefined,
-    function (error) {
+    (error) => {
       console.error("Model yüklenemedi:", error);
     }
   );
 
   await mindarThree.start();
+
   renderer.setAnimationLoop(() => {
     renderer.render(scene, camera);
   });
