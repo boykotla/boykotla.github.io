@@ -50,7 +50,7 @@ async function start() {
 
       // Modelin boyutunu ayarla: Daha büyük görünmesini istiyorsanız değerleri artırın.
       // Örneğin, 0.3 yerine 0.5 yaparak %66 daha büyük görünmesini sağlayabilirsiniz.
-      model.scale.set(0.5, 0.5, 0.5); // Her eksende aynı oranda büyütmek için genellikle hepsi aynı değerde tutulur.
+      model.scale.set(0.9, 0.9, 0.9); // Her eksende aynı oranda büyütmek için genellikle hepsi aynı değerde tutulur.
 
       // Modelin konumunu ayarla: Algılanan hedefe göre pozisyonu değiştirir.
       // Varsayılan olarak y=0.1 idi (hedefin biraz üstünde).
