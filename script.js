@@ -1,7 +1,20 @@
 const mindarThree = new window.MINDAR.IMAGE.MindARThree({
   container: document.querySelector("#ar-container"),
-  imageTargetSrc: "./assets/gokmedrese.mind"
+  imageTargetSrc: "./assets/gokmedrese.mind",
+  maxTrack: 1,
+  warmupTolerance: 0.2,
+  filterMinCF: 0.001,
+  filterBeta: 0.001,
+  uiScanning: true,
+  uiLoading: "yes",
+  
+  videoConfig: {
+    facingMode: "environment", 
+    width: { ideal: 1280 },
+    height: { ideal: 720 }
+  }
 });
+
 
 const { renderer, scene, camera } = mindarThree;
 
